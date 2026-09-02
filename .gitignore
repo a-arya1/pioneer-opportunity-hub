@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+dist/
+.env
+.DS_Store
+*.xlsx
+*.tsbuildinfo
+playwright-report/
+test-results/
+.tmp/
+*.log
+.vercel

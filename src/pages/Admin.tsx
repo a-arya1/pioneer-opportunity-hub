@@ -1,0 +1,2 @@
+import {useLocation} from 'react-router-dom';
+export default function Admin(){const loc=useLocation();return <section className="state"><p className="kicker">PROTECTED ROUTE</p><h1>Administrator access required</h1><p><code>{loc.pathname}</code> is available only to allowlisted administrators with server-verified roles. Local demo mode intentionally does not bypass authorization.</p><a className="button" href="/signin">Sign in</a></section>}

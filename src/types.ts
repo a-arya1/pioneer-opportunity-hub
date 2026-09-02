@@ -1,0 +1,5 @@
+export type Status='open'|'ongoing'|'upcoming'|'closed'|'verify';
+export type MatchClass='exact'|'likely'|'near'|'explore';
+export interface Opportunity {id:string;slug:string;title:string;organization:string;category:string;subcategory:string|null;audience:string|null;eligibility:string|null;status:Status;nextAction:string|null;deadlineText:string|null;schedule:string|null;effort:string|null;cost:string|null;compensation:string|null;format:string|null;location:string|null;transportation:string|null;requirements:string|null;summary:string;interestTags?:string[];sourceUrl:string;sourceType:string;lastVerified:string;confidence:'High'|'Medium'|'Low';notes:string|null;published:boolean;importBatch:string;sourceRow:number}
+export interface Preferences {query:string;categories:string[];freeOnly:boolean;paid:boolean;onCampus:boolean;verifiedOnly:boolean;grade?:string;maxHours?:number}
+export interface MatchResult {classification:MatchClass;score:number;passed:string[];failed:string[];unknown:string[];matchedInterests:string[];relaxed:string[];algorithmVersion:'1.0.0'}
