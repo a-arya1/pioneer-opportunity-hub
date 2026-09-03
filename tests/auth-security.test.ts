@@ -1,0 +1,30 @@
+import {readFileSync} from 'node:fs';
+import {describe,expect,it} from 'vitest';
+
+const sql=readFileSync(new URL('../supabase/migrations/202609030001_auth_privacy_hardening.sql',import.meta.url),'utf8');
+
+describe('account privacy migration',()=>{
+  it('enables row-level security on every account and operational table',()=>{
+    for(const table of ['profiles','saved_opportunities','reminders','submissions','change_requests','organization_claims','source_channels','import_batches','moderation_events','analytics_events']){
+      expect(sql).toContain(`alter table public.${table} enable row level security`);
+    }
+  });
+
+  it('ties private data policies to the authenticated user',()=>{
+    expect(sql).toContain('auth.uid() = user_id');
+    expect(sql).toContain('auth.uid() = submitter_user_id');
+    expect(sql).toContain('auth.uid() = requester_user_id');
+    expect(sql).toContain('auth.uid() = claimant_user_id');
+  });
+
+  it('prevents profile role escalation and supports self-deletion only',()=>{
+    expect(sql).toContain("role = 'student'");
+    expect(sql).toContain('delete from auth.users where id = auth.uid()');
+    expect(sql).not.toMatch(/delete from auth\.users where id\s*=\s*\$\d/i);
+  });
+
+  it('does not grant anonymous access to private tables',()=>{
+    expect(sql).toContain('revoke all on all tables in schema public from anon, authenticated');
+    expect(sql).not.toMatch(/grant .*saved_opportunities to anon/i);
+  });
+});

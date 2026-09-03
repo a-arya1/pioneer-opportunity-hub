@@ -10,7 +10,7 @@ pnpm import:opportunities ann-arbor-high-school-opportunity-inventory.xlsx
 pnpm dev
 ```
 
-Open `http://localhost:5173`. Local saves use browser storage. Sign-in, cloud sync, and email are visibly disabled until configured; the app never claims an email was sent.
+Open `http://localhost:5173`. Without an account, saves remain in browser storage. When Supabase is configured, passwordless email sign-in and private cross-device save syncing are enabled.
 
 ## Verify
 
@@ -32,14 +32,13 @@ The importer finds the `Opportunities` sheet, locates and validates its header, 
 
 ## Production database and deployment
 
-1. Create a Supabase project and run `supabase/migrations/202608250001_initial.sql` with the Supabase CLI or SQL editor.
-2. Copy `.env.example` to `.env.local`; set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, server-only `SUPABASE_SERVICE_ROLE_KEY`, and `ADMIN_EMAIL_ALLOWLIST`.
-3. Configure magic-link authentication and redirect URLs. Require MFA for allowlisted administrators.
-4. Import the workbook, commit generated source data or replace the local repository adapter with Supabase queries, then deploy with Vercel (`pnpm build`, output `dist`).
-5. Add a transactional email provider only for requested reminders. Until then, use local/in-app saves and calendar export; do not set a provider value.
-6. Configure first-party/cookieless analytics only after privacy review. Nonessential analytics remain off by default.
+1. Create a Supabase project and run every SQL file in `supabase/migrations` in filename order with the Supabase CLI or SQL editor.
+2. Copy `.env.example` to `.env.local`; set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project API settings.
+3. In Supabase Auth URL configuration, add the localhost, GitHub Pages, and Vercel roots as permitted redirect URLs. Keep leaked-password protection on and configure CAPTCHA before a broad public launch.
+4. Add the same two public values as GitHub Actions secrets and Vercel environment variables, then rebuild both deployments.
+5. Test sign-in, cross-device saves, global sign-out, account deletion, and cross-account isolation before sharing accounts publicly.
 
-Never expose the service-role key to Vite/client code. Admin mutations must use a server/edge function that verifies both the authenticated user and allowlist role. Public submissions always enter `pending` moderation state.
+Never expose a service-role key to Vite/client code. The browser uses only the project URL and publishable key; database row-level security remains the authorization boundary. Admin mutations must use a server/edge function that independently verifies authorization.
 
 ## Architecture and data dictionary
 
@@ -73,7 +72,7 @@ The public web cannot establish a complete current Pioneer club roster. Current 
 
 ## Known limitations
 
-- Production authentication, server-side moderation, reminders, analytics, and monitoring require real credentials and deployment functions.
+- Authentication requires a configured Supabase project. Server-side moderation, reminders, analytics, and monitoring still require separate production services.
 - Demo filtering covers the strongest structured fields available in the workbook; precise ages, transit time, accessibility, fee bounds, and hours need provider-confirmed structured data.
 - The workbook is a point-in-time source dated 2026-08-25. Closed and “verify” rows are retained for review but hidden by default.
 - An official current Pioneer club roster and provider ownership confirmations are still required.
