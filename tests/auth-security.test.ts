@@ -48,4 +48,22 @@ describe('privacy-safe impact measurement',()=>{
   it('does not collect emails, searches, or filter values',()=>{
     expect(impactSql).not.toMatch(/p_(email|query|search|filter)/i);
   });
+
+  it('keeps raw feedback private and exposes only validated submission functions',()=>{
+    expect(impactSql).toContain('alter table public.feedback_submissions enable row level security');
+    expect(impactSql).toContain('revoke all on public.feedback_submissions from anon, authenticated');
+    expect(impactSql).toContain("p_audience not in ('student','counselor','educator','parent','community')");
+    expect(impactSql).toContain('p_helpfulness not between 1 and 5');
+  });
+
+  it('validates correction reports and prevents direct browser inserts',()=>{
+    expect(impactSql).toContain('revoke insert on public.submissions, public.change_requests from authenticated');
+    expect(impactSql).toContain("p_kind not in ('new','correction','expired','claim','missing-club')");
+    expect(impactSql).toContain("trim(p_evidence_url) !~* '^https://");
+  });
+
+  it('removes private written feedback and reports after twelve months',()=>{
+    expect(impactSql).toContain("delete from public.feedback_submissions where created_at<now()-interval '12 months'");
+    expect(impactSql).toContain("delete from public.change_requests where created_at<now()-interval '12 months'");
+  });
 });

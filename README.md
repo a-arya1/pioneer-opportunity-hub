@@ -48,12 +48,16 @@ Set `VITE_ANALYTICS_ENABLED=true` to offer visitors an optional anonymous measur
 
 Signed-in students can privately mark a saved opportunity as applied or participated. Row-level security keeps those records account-scoped; the public dashboard receives combined totals only. Treat the dashboard as a transparent project estimate rather than audited evidence because consent choices, multiple devices, and voluntary outcome reporting can undercount or overcount activity.
 
+The feedback form does not request a name or email address. Ratings, audience type, recommendation choice, and optional comments are stored privately for 12 months; only combined response counts and ratings appear on `/impact`. Listing suggestions and correction reports follow the same private 12-month retention rule. Review them in the Supabase dashboard rather than exposing raw responses through the public API.
+
+Published listings show a visible freshness state based on `lastVerified`: recently checked through 45 days, review soon from 46–90 days, and needs rechecking after 90 days. Stale listings remain clearly marked and link directly to a prefilled correction report.
+
 ## Architecture and data dictionary
 
 - `src/data/opportunities.json`: generated local repository with workbook provenance.
 - `scripts/import-opportunities.ts`: idempotent, row-tolerant Excel importer and report.
 - `src/lib/matching.ts`: tri-state requirement evaluation and versioned explanations.
-- `src/pages`: public directory, detail, saved, submission, policy, auth, admin-denied, and 404 states.
+- `src/pages`: public directory, detail, saved, feedback, submission/correction, impact, policy, auth, admin-denied, and 404 states.
 - `supabase/migrations`: PostgreSQL schema, indexes, and initial row-level security.
 - `src/lib/retention.ts`: single source of truth for retention defaults and analytics redaction.
 
@@ -75,7 +79,7 @@ The public web cannot establish a complete current Pioneer club roster. Current 
 - Add rate limiting, bot protection, CSP/secure headers, URL validation, schema validation, audit logging, dependency scanning, and restricted upload types at the deployment edge.
 - Keep secrets in hosting configuration. Rotate keys after suspected disclosure.
 - Enable Supabase point-in-time recovery or daily backups. Quarterly: restore into an isolated project, run integrity checks, document timing, then destroy the test project.
-- Defaults: security logs 30 days, pseudonymous analytics 12 months, anonymous unverified submissions 12 months, deleted active account data within 30 days, backups about 90 days.
+- Defaults: security logs 30 days, pseudonymous analytics 12 months, anonymous feedback and unverified submissions 12 months, deleted active account data within 30 days, backups about 90 days.
 - Complete school/district, legal, minors/privacy, accessibility, vendor, and incident-response review before an official launch. No compliance claim is made here.
 
 ## Known limitations

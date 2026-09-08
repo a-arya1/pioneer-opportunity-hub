@@ -15,7 +15,7 @@ const analyticsConfigured=Boolean(supabase)&&import.meta.env.VITE_ANALYTICS_ENAB
 function readConsent():Consent{
   try{const value=localStorage.getItem(CONSENT_KEY);return value==='allowed'||value==='declined'?value:'unknown'}catch{return'unknown'}
 }
-function sessionId(){
+export function getAnonymousSessionId(){
   try{let value=sessionStorage.getItem(SESSION_KEY);if(!value){value=crypto.randomUUID();sessionStorage.setItem(SESSION_KEY,value)}return value}catch{return crypto.randomUUID()}
 }
 
@@ -26,7 +26,7 @@ export function AnalyticsProvider({children}:{children:ReactNode}){
     if(!analyticsConfigured||consent!=='allowed'||!supabase)return;
     void supabase.rpc('record_impact_event',{
       p_event_name:event,
-      p_session_id:sessionId(),
+      p_session_id:getAnonymousSessionId(),
       p_opportunity_id:details.opportunityId??null,
       p_coarse_page:details.coarsePage??null,
       p_category:details.category??null,

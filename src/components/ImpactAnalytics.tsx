@@ -8,6 +8,7 @@ function coarsePage(pathname:string){
   if(pathname.startsWith('/saved'))return'saved';
   if(pathname.startsWith('/signin'))return'sign-in';
   if(pathname.startsWith('/impact'))return'impact';
+  if(pathname.startsWith('/feedback'))return'information';
   return pathname==='/'?'home':'information';
 }
 
