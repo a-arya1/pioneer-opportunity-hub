@@ -1,7 +1,9 @@
 import {useEffect,useMemo,useState} from 'react';
+import {Link} from 'react-router-dom';
 import opportunitiesData from '../data/opportunities.json';
 import {supabase} from '../lib/supabase';
 import {listingFreshness} from '../lib/freshness';
+import {useAuth} from '../contexts/AuthContext';
 import type {Opportunity} from '../types';
 
 type ImpactSummary={
@@ -26,13 +28,14 @@ type ImpactSummary={
 const zero:ImpactSummary={accounts_created:0,students_with_saves:0,account_saves:0,applications_reported:0,participation_reported:0,anonymous_sessions:0,page_views:0,opportunity_views:0,save_actions:0,official_source_clicks:0,sign_in_links_requested:0,feedback_responses:0,average_helpfulness:null,would_recommend_count:0,reports_received:0,corrections_completed:0,measurement_started_at:null};
 
 export default function Impact(){
+  const {loading:authLoading,adminLoading,user,impactAdmin}=useAuth();
   const [summary,setSummary]=useState<ImpactSummary>(zero);
-  const [loading,setLoading]=useState(Boolean(supabase));
+  const [loading,setLoading]=useState(false);
   const [copied,setCopied]=useState(false);
   const published=(opportunitiesData as Opportunity[]).filter(item=>item.published);
   const reviewed=published.length;
   const recentlyChecked=published.filter(item=>listingFreshness(item.lastVerified).state==='current').length;
-  useEffect(()=>{if(!supabase)return;let active=true;void supabase.rpc('get_impact_summary').then(({data})=>{if(active&&Array.isArray(data)&&data[0])setSummary(data[0] as ImpactSummary);if(active)setLoading(false)});return()=>{active=false}},[]);
+  useEffect(()=>{if(!supabase||!impactAdmin)return;let active=true;setLoading(true);void supabase.rpc('get_impact_summary').then(({data})=>{if(active&&Array.isArray(data)&&data[0])setSummary(data[0] as ImpactSummary);if(active)setLoading(false)});return()=>{active=false}},[impactAdmin]);
   const statement=useMemo(()=>`Built and launched Pioneer Opportunity Hub, a directory of ${reviewed.toLocaleString()} reviewed opportunities. The project has supported ${summary.accounts_created.toLocaleString()} student accounts, ${summary.account_saves.toLocaleString()} current account saves, ${summary.official_source_clicks.toLocaleString()} visits to official opportunity sources, ${summary.applications_reported.toLocaleString()} reported applications, and ${summary.participation_reported.toLocaleString()} reported participations. It has also collected ${summary.feedback_responses.toLocaleString()} private feedback responses and completed ${summary.corrections_completed.toLocaleString()} reported directory corrections.`,[reviewed,summary]);
   const copy=async()=>{await navigator.clipboard.writeText(statement);setCopied(true);window.setTimeout(()=>setCopied(false),2000)};
   const cards=[
@@ -55,6 +58,9 @@ export default function Impact(){
     ['Reports received',summary.reports_received,'Corrections and listing suggestions'],
     ['Corrections completed',summary.corrections_completed,'Reviewed and accepted corrections'],
   ] as const;
+  if(authLoading||adminLoading)return <section className="state"><p role="status">Checking access…</p></section>;
+  if(!user)return <section className="state"><p className="kicker">PRIVATE DASHBOARD</p><h1>Impact metrics are owner-only.</h1><p>Sign in with the project owner account to view this page.</p><Link className="button" to="/signin">Sign in</Link></section>;
+  if(!impactAdmin)return <section className="state"><p className="kicker">PRIVATE DASHBOARD</p><h1>This account does not have access.</h1><p>The public directory and your own saved opportunities are still available.</p><Link className="button" to="/opportunities">Browse opportunities</Link></section>;
   return <section className="impact-page"><div className="page-heading"><p className="kicker">TRANSPARENT PROJECT METRICS</p><h1>Impact dashboard</h1><p>Aggregate evidence of how students use the directory. No names, emails, searches, or individual activity appear here.</p></div>
     {loading&&<p className="muted" role="status">Loading current impact…</p>}
     <div className="impact-grid">{cards.map(([label,value,note])=><article className="impact-card" key={label}><strong>{value.toLocaleString()}</strong><h2>{label}</h2><p>{note}</p></article>)}</div>

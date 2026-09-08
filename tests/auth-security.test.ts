@@ -3,6 +3,7 @@ import {describe,expect,it} from 'vitest';
 
 const sql=readFileSync(new URL('../supabase/migrations/202609030001_auth_privacy_hardening.sql',import.meta.url),'utf8');
 const impactSql=readFileSync(new URL('../supabase/migrations/202609070001_privacy_safe_impact.sql',import.meta.url),'utf8');
+const privateImpactSql=readFileSync(new URL('../supabase/migrations/202609080001_private_impact.sql',import.meta.url),'utf8');
 
 describe('account privacy migration',()=>{
   it('enables row-level security on every account and operational table',()=>{
@@ -65,5 +66,19 @@ describe('privacy-safe impact measurement',()=>{
   it('removes private written feedback and reports after twelve months',()=>{
     expect(impactSql).toContain("delete from public.feedback_submissions where created_at<now()-interval '12 months'");
     expect(impactSql).toContain("delete from public.change_requests where created_at<now()-interval '12 months'");
+  });
+});
+
+describe('owner-only impact dashboard',()=>{
+  it('keeps the administrator allowlist inaccessible to browsers',()=>{
+    expect(privateImpactSql).toContain('alter table public.impact_admins enable row level security');
+    expect(privateImpactSql).toContain('revoke all on public.impact_admins from anon, authenticated');
+  });
+
+  it('requires explicit administrator membership for impact totals',()=>{
+    expect(privateImpactSql).toContain('not exists(\n    select 1 from public.impact_admins where user_id=auth.uid()');
+    expect(privateImpactSql).toContain("raise insufficient_privilege using message='Impact dashboard access denied'");
+    expect(privateImpactSql).toContain('grant execute on function public.get_impact_summary() to authenticated');
+    expect(privateImpactSql).not.toMatch(/grant execute on function public\.get_impact_summary\(\) to anon/i);
   });
 });

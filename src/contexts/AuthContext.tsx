@@ -6,6 +6,8 @@ import {authRedirectUrl,isSupabaseConfigured,supabase} from '../lib/supabase';
 type AuthValue={
   configured:boolean;
   loading:boolean;
+  adminLoading:boolean;
+  impactAdmin:boolean;
   user:User|null;
   sendMagicLink:(email:string)=>Promise<void>;
   signOut:()=>Promise<void>;
@@ -17,6 +19,8 @@ const AuthContext=createContext<AuthValue|null>(null);
 export function AuthProvider({children}:{children:ReactNode}){
   const [user,setUser]=useState<User|null>(null);
   const [loading,setLoading]=useState(isSupabaseConfigured);
+  const [impactAdmin,setImpactAdmin]=useState(false);
+  const [adminLoading,setAdminLoading]=useState(false);
 
   useEffect(()=>{
     if(!supabase){setLoading(false);return;}
@@ -30,9 +34,21 @@ export function AuthProvider({children}:{children:ReactNode}){
     return()=>{active=false;subscription.unsubscribe();};
   },[]);
 
+  useEffect(()=>{
+    if(!supabase||!user){setImpactAdmin(false);setAdminLoading(false);return;}
+    let active=true;
+    setAdminLoading(true);
+    void supabase.rpc('is_impact_admin').then(({data,error})=>{
+      if(active){setImpactAdmin(!error&&data===true);setAdminLoading(false);}
+    });
+    return()=>{active=false;};
+  },[user]);
+
   const value=useMemo<AuthValue>(()=>({
     configured:isSupabaseConfigured,
     loading,
+    adminLoading,
+    impactAdmin,
     user,
     async sendMagicLink(email){
       if(!supabase)throw new Error('Account service is not configured.');
@@ -54,7 +70,7 @@ export function AuthProvider({children}:{children:ReactNode}){
       await supabase.auth.signOut({scope:'local'});
       setUser(null);
     },
-  }),[loading,user]);
+  }),[adminLoading,impactAdmin,loading,user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

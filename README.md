@@ -40,15 +40,15 @@ The importer finds the `Opportunities` sheet, locates and validates its header, 
 
 Never expose a service-role key to Vite/client code. The browser uses only the project URL and publishable key; database row-level security remains the authorization boundary. Admin mutations must use a server/edge function that independently verifies authorization.
 
-The repository also includes `firebase.json` and `.firebaserc` for the no-cost Firebase Hosting mirror. Build with the public Supabase URL and publishable key, then deploy with `firebase deploy --only hosting`. The single-page rewrite keeps direct links such as `/opportunities` and `/impact` working.
+The repository also includes `firebase.json` and `.firebaserc` for the no-cost Firebase Hosting mirror. Build with the public Supabase URL and publishable key, then deploy with `firebase deploy --only hosting`. The single-page rewrite keeps direct links such as `/opportunities` and the owner-only `/impact` dashboard working.
 
 ### Privacy-safe impact measurement
 
-Set `VITE_ANALYTICS_ENABLED=true` to offer visitors an optional anonymous measurement choice. No analytics are recorded before consent. The browser sends only an allowlisted event name, a temporary random session ID, an optional opportunity ID, and a coarse page category—never an email address, search text, or selected filters. Raw events are blocked from browser reads, retained for 12 months, and exposed publicly only through aggregate counts on `/impact`.
+Set `VITE_ANALYTICS_ENABLED=true` to offer visitors an optional anonymous measurement choice. No analytics are recorded before consent. The browser sends only an allowlisted event name, a temporary random session ID, an optional opportunity ID, and a coarse page category—never an email address, search text, or selected filters. Raw events are blocked from browser reads, retained for 12 months, and summarized only for an explicitly designated impact administrator.
 
-Signed-in students can privately mark a saved opportunity as applied or participated. Row-level security keeps those records account-scoped; the public dashboard receives combined totals only. Treat the dashboard as a transparent project estimate rather than audited evidence because consent choices, multiple devices, and voluntary outcome reporting can undercount or overcount activity.
+Signed-in students can privately mark a saved opportunity as applied or participated. Row-level security keeps those records account-scoped; only the private owner dashboard receives combined totals. Treat the dashboard as a project estimate rather than audited evidence because consent choices, multiple devices, and voluntary outcome reporting can undercount or overcount activity.
 
-The feedback form does not request a name or email address. Ratings, audience type, recommendation choice, and optional comments are stored privately for 12 months; only combined response counts and ratings appear on `/impact`. Listing suggestions and correction reports follow the same private 12-month retention rule. Review them in the Supabase dashboard rather than exposing raw responses through the public API.
+The feedback form does not request a name or email address. Ratings, audience type, recommendation choice, and optional comments are stored privately for 12 months; only combined response counts and ratings appear on the owner-only `/impact` page. Listing suggestions and correction reports follow the same private 12-month retention rule. Review them in the Supabase dashboard rather than exposing raw responses through the public API.
 
 Published listings show a visible freshness state based on `lastVerified`: recently checked through 45 days, review soon from 46–90 days, and needs rechecking after 90 days. Stale listings remain clearly marked and link directly to a prefilled correction report.
 
