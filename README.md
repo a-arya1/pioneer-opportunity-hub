@@ -34,11 +34,19 @@ The importer finds the `Opportunities` sheet, locates and validates its header, 
 
 1. Create a Supabase project and run every SQL file in `supabase/migrations` in filename order with the Supabase CLI or SQL editor.
 2. Copy `.env.example` to `.env.local`; set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project API settings.
-3. In Supabase Auth URL configuration, add the localhost, GitHub Pages, and Vercel roots as permitted redirect URLs. Keep leaked-password protection on and configure CAPTCHA before a broad public launch.
-4. Add the same two public values as GitHub Actions secrets and Vercel environment variables, then rebuild both deployments.
+3. In Supabase Auth URL configuration, add the localhost, Firebase Hosting, GitHub Pages, and Vercel roots as permitted redirect URLs. Keep leaked-password protection on and configure CAPTCHA before a broad public launch.
+4. Add the same two public values as GitHub Actions secrets and Vercel environment variables, then rebuild both deployments. The Firebase mirror reads the values during its local production build.
 5. Test sign-in, cross-device saves, global sign-out, account deletion, and cross-account isolation before sharing accounts publicly.
 
 Never expose a service-role key to Vite/client code. The browser uses only the project URL and publishable key; database row-level security remains the authorization boundary. Admin mutations must use a server/edge function that independently verifies authorization.
+
+The repository also includes `firebase.json` and `.firebaserc` for the no-cost Firebase Hosting mirror. Build with the public Supabase URL and publishable key, then deploy with `firebase deploy --only hosting`. The single-page rewrite keeps direct links such as `/opportunities` and `/impact` working.
+
+### Privacy-safe impact measurement
+
+Set `VITE_ANALYTICS_ENABLED=true` to offer visitors an optional anonymous measurement choice. No analytics are recorded before consent. The browser sends only an allowlisted event name, a temporary random session ID, an optional opportunity ID, and a coarse page category—never an email address, search text, or selected filters. Raw events are blocked from browser reads, retained for 12 months, and exposed publicly only through aggregate counts on `/impact`.
+
+Signed-in students can privately mark a saved opportunity as applied or participated. Row-level security keeps those records account-scoped; the public dashboard receives combined totals only. Treat the dashboard as a transparent project estimate rather than audited evidence because consent choices, multiple devices, and voluntary outcome reporting can undercount or overcount activity.
 
 ## Architecture and data dictionary
 

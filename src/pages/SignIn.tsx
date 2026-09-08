@@ -1,9 +1,11 @@
 import {useState,type FormEvent} from 'react';
 import {Link} from 'react-router-dom';
 import {useAuth} from '../contexts/AuthContext';
+import {useAnalytics} from '../contexts/AnalyticsContext';
 
 export default function SignIn(){
   const {configured,loading,user,sendMagicLink}=useAuth();
+  const {track}=useAnalytics();
   const [email,setEmail]=useState('');
   const [sending,setSending]=useState(false);
   const [sent,setSent]=useState(false);
@@ -12,7 +14,7 @@ export default function SignIn(){
   const submit=async(e:FormEvent)=>{
     e.preventDefault();
     setError('');setSending(true);
-    try{await sendMagicLink(email.trim());setSent(true)}
+    try{await sendMagicLink(email.trim());track('magic_link_requested');setSent(true)}
     catch{setError('We could not send a sign-in link. Please wait a minute and try again.')}
     finally{setSending(false)}
   };
@@ -28,7 +30,7 @@ export default function SignIn(){
       {error&&<p className="form-error" role="alert">{error}</p>}
       <button className="button" disabled={sending}>{sending?'Sending…':'Email me a secure sign-in link'}</button>
     </form>}
-    <div className="privacy-note"><strong>What gets stored?</strong><p>Only your email, account security records, and the IDs of opportunities you save. Signing in uploads saved opportunity IDs from this browser so they can sync. Your profile is not public.</p></div>
+    <div className="privacy-note"><strong>What gets stored?</strong><p>Only your email, account security records, saved opportunity IDs, and any application or participation status you choose to report. Signing in uploads saved opportunity IDs from this browser so they can sync. Your profile is not public.</p></div>
     <p className="muted">By continuing, you agree to the <Link to="/terms">terms</Link> and acknowledge the <Link to="/privacy">privacy notice</Link>.</p>
   </section>;
 }
