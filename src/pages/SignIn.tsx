@@ -15,7 +15,14 @@ export default function SignIn(){
     e.preventDefault();
     setError('');setSending(true);
     try{await sendMagicLink(email.trim());track('magic_link_requested');setSent(true)}
-    catch{setError('We could not send a sign-in link. Please wait a minute and try again.')}
+    catch(error:unknown){
+      const message=error instanceof Error?error.message.toLowerCase():'';
+      setError(message.includes('rate limit')||message.includes('too many')
+        ?'Email delivery is temporarily rate-limited. Please wait a little longer before requesting another link.'
+        :message.includes('redirect')||message.includes('url')
+          ?'This site’s sign-in address is not configured correctly yet. Please try again later.'
+          :'We could not send a sign-in link. Please check the email address and try again later.');
+    }
     finally{setSending(false)}
   };
 
@@ -24,7 +31,7 @@ export default function SignIn(){
 
   return <section className="form-page"><p className="kicker">OPTIONAL ACCOUNT</p><h1>Sign in or create an account</h1><p>Enter your email and we’ll send a one-time sign-in link. There is no password to remember.</p>
     {!configured?<div className="alert"><strong>Accounts are being connected.</strong> Browsing and on-device saves still work, but email sign-in is not available on this version yet.</div>:
-    sent?<div className="alert success" role="status"><strong>Check your inbox.</strong> If the address can receive mail, a secure link is on its way. Open it in this browser. For privacy, we show the same message for every address.</div>:
+    sent?<div className="alert success" role="status"><strong>Check your inbox.</strong> If the address can receive mail, a secure link is on its way. For privacy, we show the same message for every address.</div>:
     <form onSubmit={submit}>
       <label>Email<input type="email" autoComplete="email" inputMode="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>
       {error&&<p className="form-error" role="alert">{error}</p>}
