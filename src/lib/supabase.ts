@@ -7,7 +7,9 @@ export const isSupabaseConfigured=Boolean(url&&publishableKey);
 export const supabase=isSupabaseConfigured
   ?createClient(url!,publishableKey!,{
     auth:{
-      flowType:'pkce',
+      // This is a client-only static site. Implicit flow lets a magic link
+      // finish even when the email opens in a different browser.
+      flowType:'implicit',
       persistSession:true,
       autoRefreshToken:true,
       detectSessionInUrl:true,
