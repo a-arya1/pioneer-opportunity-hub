@@ -43,14 +43,14 @@ export default function Impact(){
     ['Student accounts',summary.accounts_created,'Current registered accounts'],
     ['Students saving opportunities',summary.students_with_saves,'Accounts with at least one save'],
     ['Opportunities saved',summary.account_saves,'Current private account saves'],
-    ['Official-source visits',summary.official_source_clicks,'Anonymous opt-in clicks'],
+    ['Official-source visits',summary.official_source_clicks,'Anonymous source-link clicks'],
     ['Applications reported',summary.applications_reported,'Private student outcome'],
     ['Participation reported',summary.participation_reported,'Stronger student outcome'],
     ['Anonymous sessions',summary.anonymous_sessions,'Opt-in, session-level estimate'],
-    ['Page views',summary.page_views,'Anonymous opt-in views'],
-    ['Opportunity views',summary.opportunity_views,'Anonymous opt-in detail views'],
-    ['Save actions',summary.save_actions,'Anonymous opt-in save clicks'],
-    ['Sign-in links requested',summary.sign_in_links_requested,'Anonymous opt-in successful requests'],
+    ['Page views',summary.page_views,'Anonymous page-category views'],
+    ['Opportunity views',summary.opportunity_views,'Anonymous detail views'],
+    ['Save actions',summary.save_actions,'Anonymous save clicks'],
+    ['Sign-in links requested',summary.sign_in_links_requested,'Anonymous successful requests'],
     ['Recently checked listings',recentlyChecked,'Verified within the last 45 days'],
     ['Feedback responses',summary.feedback_responses,'Private student and counselor surveys'],
     ['Average usefulness',summary.feedback_responses?`${Number(summary.average_helpfulness).toFixed(1)}/5`:'—','Combined survey rating'],
@@ -65,6 +65,6 @@ export default function Impact(){
     {loading&&<p className="muted" role="status">Loading current impact…</p>}
     <div className="impact-grid">{cards.map(([label,value,note])=><article className="impact-card" key={label}><strong>{value.toLocaleString()}</strong><h2>{label}</h2><p>{note}</p></article>)}</div>
     <section className="impact-statement"><div><p className="kicker">COLLEGE APPLICATION SUMMARY</p><h2>Copy a factual project summary</h2><p>{statement}</p></div><button className="button secondary" onClick={()=>void copy()}>{copied?'Copied':'Copy summary'}</button></section>
-    <section className="impact-method"><h2>How these numbers work</h2><p>Account and save totals come from private account records and are shown only as combined counts. Visits, page views, saves, sign-in-link requests, and official-source clicks are counted only after a visitor opts in to anonymous measurement. A temporary random session ID prevents duplicate counts; it is not connected to an email or account.</p><p>Search text, selected filters, written feedback, and correction details are never published. Anonymous events, feedback, and unverified reports are removed by daily cleanup after 12 months (up to 24 additional hours while the database is running). Application and participation totals are voluntary self-reports and may undercount real outcomes.</p>{summary.measurement_started_at&&<p className="muted">Anonymous measurement began {new Date(summary.measurement_started_at).toLocaleDateString()}.</p>}</section>
+    <section className="impact-method"><h2>How these numbers work</h2><p>Account and save totals come from private account records and are shown only as combined counts. Basic usage counts run automatically so the project has a complete activity estimate: visits, page views, saves, sign-in-link requests, and official-source clicks. A temporary random session ID prevents duplicate counts; it is not connected to an email or account.</p><p>We never record search text, selected filters, names, emails, or individual account activity in this dashboard. Events are deduplicated by session, action, opportunity or page, and day, then removed by daily cleanup after 12 months (up to 24 additional hours while the database is running). Application and participation totals are voluntary self-reports and may undercount real outcomes.</p>{summary.measurement_started_at&&<p className="muted">Anonymous measurement began {new Date(summary.measurement_started_at).toLocaleDateString()}.</p>}</section>
   </section>;
 }

@@ -44,7 +44,7 @@ The repository also includes `firebase.json` and `.firebaserc` for the no-cost F
 
 ### Privacy-safe impact measurement
 
-Set `VITE_ANALYTICS_ENABLED=true` to offer visitors an optional anonymous measurement choice. No analytics are recorded before consent. The browser sends only an allowlisted event name, a temporary random session ID, an optional opportunity ID, and a coarse page category—never an email address, search text, or selected filters. Raw events are blocked from browser reads, retained for 12 months, and summarized only for an explicitly designated impact administrator.
+Anonymous activity measurement runs automatically when Supabase is configured. The browser sends only an allowlisted event name, a temporary random session ID, an optional opportunity ID, and a coarse page category—never an email address, search text, or selected filters. Events are deduplicated by day, raw events are blocked from browser reads, retained for 12 months, and summarized only for an explicitly designated impact administrator.
 
 Signed-in students can privately mark a saved opportunity as applied or participated. Row-level security keeps those records account-scoped; only the private owner dashboard receives combined totals. Treat the dashboard as a project estimate rather than audited evidence because consent choices, multiple devices, and voluntary outcome reporting can undercount or overcount activity.
 
