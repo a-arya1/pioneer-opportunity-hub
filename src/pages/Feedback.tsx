@@ -22,7 +22,7 @@ export default function Feedback(){
       p_would_recommend:form.recommend==='yes',p_missing:form.missing||null,p_comments:form.comments||null,p_consent:form.consent,
     });
     setBusy(false);
-    if(submitError){setError('We could not save your feedback. Please try again.');return}
+    if(submitError){setError(submitError.message.startsWith('Too many requests')?'Feedback is busy right now. Please wait and try again later.':'We could not save your feedback. Please try again.');return}
     setSent(true);
   };
   if(sent)return <section className="state"><p className="kicker">FEEDBACK RECEIVED</p><h1>Thank you for helping improve the hub.</h1><p>Your written response stays private. Only combined ratings and response totals are available to the project owner.</p><div className="actions"><Link className="button" to="/opportunities">Browse opportunities</Link></div></section>;
@@ -34,7 +34,7 @@ export default function Feedback(){
       <fieldset className="form-fieldset"><legend>Would you recommend it to another student?</legend><div className="choice-row"><label className="check"><input required type="radio" name="recommend" value="yes" checked={form.recommend==='yes'} onChange={event=>set('recommend',event.target.value)}/>Yes</label><label className="check"><input required type="radio" name="recommend" value="no" checked={form.recommend==='no'} onChange={event=>set('recommend',event.target.value)}/>Not yet</label></div></fieldset>
       <label>What opportunity or category is missing? <small>Optional · 500 characters maximum</small><textarea maxLength={500} rows={3} value={form.missing} onChange={event=>set('missing',event.target.value)}/></label>
       <label>What should be improved? <small>Optional · 1,500 characters maximum</small><textarea maxLength={1500} rows={5} value={form.comments} onChange={event=>set('comments',event.target.value)}/></label>
-      <label className="check"><input type="checkbox" required checked={form.consent} onChange={event=>set('consent',event.target.checked)}/>I understand my written feedback is stored privately for review and only combined statistics may be published.</label>
+      <label className="check"><input type="checkbox" required checked={form.consent} onChange={event=>set('consent',event.target.checked)}/>I understand my written feedback is stored privately for review and combined statistics are available to the project owner.</label>
       {error&&<p className="form-error" role="alert">{error}</p>}<button className="button" type="submit" disabled={busy}>{busy?'Sending…':'Send feedback'}</button>
     </form>
   </section>;

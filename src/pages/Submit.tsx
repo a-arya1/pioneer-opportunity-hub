@@ -33,7 +33,7 @@ export default function Submit(){
       p_evidence_url:source||null,p_details:details,p_confirmed:confirmed,
     });
     setBusy(false);
-    if(submitError){setError('We could not save this report. Please check the information and try again.');return}
+    if(submitError){setError(submitError.message.startsWith('Too many requests')?'Reports are busy right now. Please wait and try again later.':'We could not save this report. Please check the information and try again.');return}
     setSent(true);
   };
   if(sent)return <div className="state"><p className="kicker">SUBMISSION RECEIVED</p><h1>Thanks. It’s waiting for review.</h1><p>Nothing publishes automatically. The evidence will be compared with current official sources.</p><Link className="button" to="/opportunities">Return to opportunities</Link></div>;

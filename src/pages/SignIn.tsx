@@ -30,7 +30,7 @@ export default function SignIn(){
       {error&&<p className="form-error" role="alert">{error}</p>}
       <button className="button" disabled={sending}>{sending?'Sending…':'Email me a secure sign-in link'}</button>
     </form>}
-    <div className="privacy-note"><strong>What gets stored?</strong><p>Only your email, account security records, saved opportunity IDs, and any application or participation status you choose to report. Signing in uploads saved opportunity IDs from this browser so they can sync. Your profile is not public.</p></div>
+    <div className="privacy-note"><strong>What gets stored?</strong><p>Only your email, account security records, saved opportunity IDs, and any application or participation status you choose to report. Guest saves stay separate. When signed in, saves belong only to your account. Your profile is not public.</p></div>
     <p className="muted">By continuing, you agree to the <Link to="/terms">terms</Link> and acknowledge the <Link to="/privacy">privacy notice</Link>.</p>
   </section>;
 }

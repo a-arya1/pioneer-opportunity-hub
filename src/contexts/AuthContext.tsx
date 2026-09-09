@@ -19,7 +19,8 @@ const AuthContext=createContext<AuthValue|null>(null);
 export function AuthProvider({children}:{children:ReactNode}){
   const [user,setUser]=useState<User|null>(null);
   const [loading,setLoading]=useState(isSupabaseConfigured);
-  const [impactAdmin,setImpactAdmin]=useState(false);
+  const [adminUserId,setAdminUserId]=useState<string|null>(null);
+  const impactAdmin=Boolean(user&&adminUserId===user.id);
   const [adminLoading,setAdminLoading]=useState(false);
 
   useEffect(()=>{
@@ -35,11 +36,11 @@ export function AuthProvider({children}:{children:ReactNode}){
   },[]);
 
   useEffect(()=>{
-    if(!supabase||!user){setImpactAdmin(false);setAdminLoading(false);return;}
+    if(!supabase||!user){setAdminUserId(null);setAdminLoading(false);return;}
     let active=true;
     setAdminLoading(true);
     void supabase.rpc('is_impact_admin').then(({data,error})=>{
-      if(active){setImpactAdmin(!error&&data===true);setAdminLoading(false);}
+      if(active){setAdminUserId(!error&&data===true?user.id:null);setAdminLoading(false);}
     });
     return()=>{active=false;};
   },[user]);

@@ -10,7 +10,7 @@ pnpm import:opportunities ann-arbor-high-school-opportunity-inventory.xlsx
 pnpm dev
 ```
 
-Open `http://localhost:5173`. Without an account, saves remain in browser storage. When Supabase is configured, passwordless email sign-in and private cross-device save syncing are enabled.
+Open `http://localhost:5173`. Guest saves remain in the current tab session. Account saves live in Supabase and memory only; guest saves are never silently imported. The pre-security-update mixed local cache is discarded because its owner cannot be established. Existing cloud saves are preserved.
 
 ## Verify
 
@@ -53,6 +53,16 @@ The feedback form does not request a name or email address. Ratings, audience ty
 Published listings show a visible freshness state based on `lastVerified`: recently checked through 45 days, review soon from 46–90 days, and needs rechecking after 90 days. Stale listings remain clearly marked and link directly to a prefilled correction report.
 
 ## Architecture and data dictionary
+
+### Security maintenance
+
+Run migrations in order, including `202609090001_security_gaps.sql`. Its daily `pg_cron` job removes records older than 12 months at 04:17 UTC, independently of visits; allow up to 24 extra hours while the database is running. Paused databases cannot run scheduled cleanup. The job also removes expired abuse-limit buckets after 35 days. Inspect `cron.job` and `cron.job_run_details` to check scheduling and failures.
+
+Public feedback, correction and analytics functions have atomic hourly, daily, monthly and per-caller budgets. Changing a browser ID does not reset site-wide limits. Feedback and reports each allow 20/hour, 100/day and 1,000/month; analytics allows 120/hour, 1,000/day and 20,000/month. These limits deliberately trade temporary availability for bounded stored volume. They are not proof that an event came from a real student; impact totals remain estimates. No IP addresses are collected. Limits do not replace Supabase's own authentication email limits.
+
+`supabase/tests/security_behavior.sql` exercises live database permissions with temporary identities inside a transaction that rolls back: cross-account read/write denial, owner-only metrics, self-promotion denial, consent validation, successful form writes, rate-limit enforcement and retention. It sends no email and leaves no test users or submissions. `tests/saved-isolation.test.tsx` exercises the React provider across guest, sign-in, sign-out, account switching, failed writes and late responses. A real mailbox magic-link delivery test is separate.
+
+The local spreadsheet importer uses the official SheetJS 0.20.3 tarball as a development dependency. It is not included in the browser application. Dependency audit covers development tools as well as the website.
 
 - `src/data/opportunities.json`: generated local repository with workbook provenance.
 - `scripts/import-opportunities.ts`: idempotent, row-tolerant Excel importer and report.
