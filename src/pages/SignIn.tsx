@@ -29,7 +29,7 @@ export default function SignIn(){
   if(loading)return <section className="form-page"><p className="kicker">PRIVATE ACCOUNT</p><h1>Checking your account…</h1></section>;
   if(user)return <section className="form-page"><p className="kicker">PRIVATE ACCOUNT</p><h1>You’re signed in</h1><p>Your saved opportunities can sync privately across your devices.</p><Link className="button" to="/account">Open your account</Link></section>;
 
-  return <section className="form-page"><p className="kicker">OPTIONAL ACCOUNT</p><h1>Sign in or create an account</h1><p>Enter your email and we’ll send a one-time sign-in link. There is no password to remember.</p>
+  return <section className="form-page"><p className="kicker">OPTIONAL ACCOUNT</p><h1>Sign in or create an account</h1><p>Enter your email and we’ll send a one-time sign-in link. There is no password to remember.</p><p className="privacy-note"><strong>Under 13?</strong> Please browse without an account unless a parent or guardian gives permission.</p>
     {!configured?<div className="alert"><strong>Accounts are being connected.</strong> Browsing and on-device saves still work, but email sign-in is not available on this version yet.</div>:
     sent?<div className="alert success" role="status"><strong>Check your inbox.</strong> If the address can receive mail, a secure link is on its way. For privacy, we show the same message for every address.</div>:
     <form onSubmit={submit}>
